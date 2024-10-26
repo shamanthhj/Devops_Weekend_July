@@ -5,6 +5,7 @@ pipeline{
         stage('build'){
             steps{
                 sh '''
+                bash ${WORKSPACE}/New_script.sh
                 echo "Build is ready"
                 '''
             }
