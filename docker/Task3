@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Define the base name for the containers
+container_base_name="my_container"
+
+# Loop to create 10 containers
+for i in {1..10}
+do
+    container_name="${container_base_name}_${i}"
+
+    # Check if the container exists
+    if [ $(docker ps -a --filter "name=${container_name}" -q) ]; then
+        echo "Container ${container_name} exists. Deleting it..."
+        docker rm -f ${container_name} # Forcefully remove the existing container
+    fi
+
+    # Create a new container
+    echo "Creating container ${container_name}..."
+    docker run -d --name ${container_name} ubuntu:latest tail -f /dev/null # Keep container running indefinitely
+
+done
+
+echo "Containers created successfully."
