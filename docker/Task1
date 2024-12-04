@@ -1,0 +1,7 @@
+FROM ubuntu:22.04
+RUN apt update 
+RUN apt install apache2 -y
+RUN rm -f /var/www/html/index.com
+COPY index.html /var/www/html
+
+echo "<h1> Hello Shamanth! </h1>" > index.html
