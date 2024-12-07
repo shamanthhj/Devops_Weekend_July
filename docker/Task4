@@ -1,19 +1,16 @@
 # Use an official Ubuntu as a base image
 FROM ubuntu:latest
 
-# Set environment variable to avoid interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Update package list and install necessary packages
+# Update package list, install necessary packages, and configure SSH
 RUN apt-get update && apt-get install -y \
-    openssh-server \
-    && mkdir /var/run/sshd \
-    && echo 'root:root123' | chpasswd \
-    && sed -i 's/^#PermitRootLogin*/PermitRootLogin yes/' /etc/ssh/sshd_config \
-    && service ssh start
+    openssh-server && \
+    mkdir /var/run/sshd && \
+    echo 'root:root123' | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 # Expose port 22 (SSH port)
 EXPOSE 22
 
-# Start SSH service
+# Start SSH service in the foreground
 CMD ["/usr/sbin/sshd", "-D"]
