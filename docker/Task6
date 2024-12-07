@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image with the Dockerfile in the current workspace
-                    sh "docker container run -b -p 8080:80 shamanthhj/task2"
+                    sh "docker container run -d -p 8080:80 shamanthhj/task2"
                 }
             }
         }
