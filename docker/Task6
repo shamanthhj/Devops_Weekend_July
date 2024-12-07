@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "shamanthhj/task2"  // Docker image name
+        DOCKER_HUB_REPO = "shamanthhj/task6"  // Docker Hub repo
+        DOCKER_HUB_CREDENTIALS_ID = "dockerhub-credentials"  // Jenkins credentials ID for Docker Hub
+        IMAGE_TAG = "latest"  // Unique image tag for each build
+    }
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image with the Dockerfile in the current workspace
+                    sh "docker container run -b -p 8080:80 shamanthhj/task2"
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    // Tag the image with the Docker Hub repository name
+                    sh "docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Log in to Docker Hub using credentials from Jenkins
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    }
+
+                    // Push the tagged image to Docker Hub
+                    sh "docker push ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Stage 4: Pull Image in Slave Machine') {
+            agent {
+                label 'slave'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
+            }
+            steps {
+                script {
+                    // Pull the image on the slave machine using the same tag
+                    sh "docker pull ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Stage 5: Create Container and Validate Application') {
+            agent {
+                label 'slave'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
+            }
+            steps {
+                script {
+                    // Create a container from the pulled image
+                    sh "docker run -d --name my-app-container ${DOCKER_HUB_REPO}:${IMAGE_TAG}"
+
+                    // Validate that the application is running by checking container status
+                    def status = sh(script: "docker ps -f name=my-app-container --format '{{.Status}}'", returnStdout: true).trim()
+                    if (status.contains("Up")) {
+                        echo "Application is running successfully in the container."
+                    } else {
+                        error "Application failed to start."
+                    }
+
+                    // Optionally, validate the application with curl if it's a web app
+                    // sh "curl http://localhost:8080"  // Adjust the URL/port based on your application
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up the container on the slave machine after validation
+            sh 'ssh user@slave-machine "docker rm -f my-app-container || true"'
+        }
+    }
+}
