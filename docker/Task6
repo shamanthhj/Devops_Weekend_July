@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "shamanthhj/task2"  // Docker image name
-        DOCKER_HUB_REPO = "shamanthhj/task6"  // Docker Hub repo
+        DOCKER_IMAGE = "ubuntu"  // Docker image name
+        DOCKER_HUB_REPO = "shamanthhj/task7"  // Docker Hub repo
         DOCKER_HUB_CREDENTIALS_ID = "dockerhub-credentials"  // Jenkins credentials ID for Docker Hub
         IMAGE_TAG = "latest"  // Unique image tag for each build
     }
@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image with the Dockerfile in the current workspace
-                    sh "docker container run -d -p 8080:80 shamanthhj/task2"
+                    sh "docker container run -d -p 9000:80 ubuntu:latest"
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
 
         stage('Stage 4: Pull Image in Slave Machine') {
             agent {
-                label 'slave'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
+                label 'node'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
             }
             steps {
                 script {
@@ -55,7 +55,7 @@ pipeline {
 
         stage('Stage 5: Create Container and Validate Application') {
             agent {
-                label 'slave'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
+                label 'node'  // Ensure the pipeline runs on a Jenkins slave with Docker installed
             }
             steps {
                 script {
