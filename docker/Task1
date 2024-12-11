@@ -3,3 +3,4 @@ RUN apt update
 RUN apt install apache2 -y
 RUN rm -f /var/www/html/index.html
 RUN echo "<h1>Hello!!!...</h1>" >> /var/www/html/index.html
+EXPOSE 8080
