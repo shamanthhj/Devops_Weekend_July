@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh """
+                    echo "Building Docker image"
+                    docker build -t hell:1.0 .
+                """
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh """
+                    echo "Deploying container"
+                    docker container run -d --name hell -p 80:80 hell:1.0
+                """
+            }
+        }
+        stage('Verify') {
+            steps {
+                sh """
+                    echo "Verifying container"
+                    docker container ls
+                """
+            }
+        }
+    }
+}
+
+
+          
