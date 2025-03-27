@@ -5,7 +5,8 @@ pipeline {
             steps {
                 sh """
                     echo "Building Docker image"
-                    docker build -t hell:1.0 ${WORKSPACE}/docker 
+                    docker build -t hell:1.0 docker build -t my-image:latest /var/jenkins_home/workspace/hell/docker
+ 
                 """
             }
         }
